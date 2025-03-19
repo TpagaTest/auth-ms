@@ -1,0 +1,15 @@
+services:
+  database:
+    image: postgres:14
+    environment:
+      - POSTGRES_DB=tpaga
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgresql-volume:/var/lib/postgresql  # Ahora usa el volumen correcto
+
+volumes:
+  postgresql-volume:
+    external: true
