@@ -44,12 +44,31 @@ export class AuthService {
     return tokens;
   }
 
+  async me(token: string) {
+    const decoded = await this.jwtService.verifyAsync(token, { secret: envs['JWT_ACCESS_SECRET'] });
+    const user: any = await this.usersService.findOneById(decoded.sub);
+    if (!user) throw new BadRequestException('User does not exist');
+    const tokens = await this.getTokens(user.id, user.email);
+    await this.updateRefreshToken(user.id, tokens.refreshToken);
+    return {user, ...tokens};
+  }
+
   async validate(token: string) {
     try {
-      console.log(envs['JWT_ACCESS_SECRET'], token)
       const decoded = await this.jwtService.verifyAsync(token, { secret: envs['JWT_ACCESS_SECRET'] });
-      console.log(decoded)
       return decoded;
+    } catch (error) {
+      throw new BadRequestException('Invalid or expired token');
+    }
+  }
+
+  async refreshToken(token: string) {
+    try {
+      const decoded = await this.jwtService.verifyAsync(token, { secret: envs['JWT_REFRESH_SECRET'] });
+      const user: any = await this.usersService.findOneById(decoded.sub);
+      const tokens = await this.getTokens(user.id, user.email);
+      await this.updateRefreshToken(user.id, tokens.refreshToken);
+      return tokens;
     } catch (error) {
       throw new BadRequestException('Invalid or expired token');
     }

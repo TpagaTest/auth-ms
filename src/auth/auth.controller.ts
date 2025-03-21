@@ -26,6 +26,15 @@ export class AuthController {
     }
   }
 
+  @MessagePattern('me')
+  async getMe(@Payload() token: string) {
+    try {
+      return await this.authService.me(token);
+    } catch (error) {
+      throw new RpcException(error.message || 'Get me failed');
+    }
+  }
+
   @MessagePattern('logout')
   async logout(@Payload() req: Request) {
     try {
@@ -41,6 +50,15 @@ export class AuthController {
       return await this.authService.validate(token);
     } catch (error) {
       throw new RpcException(error.message || 'Token validation failed');
+    }
+  }
+
+  @MessagePattern('refreshToken')
+  async refreshToken(@Payload() token: string) {
+    try {
+      return await this.authService.refreshToken(token);
+    } catch (error) {
+      throw new RpcException(error.message || 'Refresh token failed');
     }
   }
 }
